@@ -1,3 +1,4 @@
+import http from 'http';
 import {
   Client,
   GatewayIntentBits,
@@ -171,5 +172,33 @@ if (CONFIG.DISCORD_TOKEN) {
     console.error('\x1b[31m[Zenox Gateway] Failed to connect with DISCORD_TOKEN:\x1b[0m', err.message);
   });
 } else {
-  console.log(`\x1b[33m[Zenox Gateway] No DISCORD_TOKEN specified in .env.\x1b[0m`);
+  console.warn(`\x1b[33m[Zenox Gateway] WARNING: No DISCORD_TOKEN found in environment variables!\x1b[0m`);
+  console.warn(`\x1b[33m[Zenox Gateway] On Render.com: Go to your service Dashboard -> Environment -> Add DISCORD_TOKEN, CLIENT_ID, and GUILD_ID.\x1b[0m`);
 }
+
+// Lightweight HTTP server for Render.com & UptimeRobot 24/7 keep-alive
+const port = parseInt(process.env.PORT || '10000', 10);
+const server = http.createServer((req, res) => {
+  if (req.url === '/health' || req.url === '/') {
+    const isBotReady = Boolean(client && client.isReady());
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(
+      JSON.stringify({
+        status: 'online',
+        service: 'Zenox Cinema Discord Bot',
+        botReady: isBotReady,
+        botTag: client.user ? client.user.tag : 'Connecting...',
+        uptimeSeconds: Math.floor(process.uptime()),
+        pingMs: client.ws ? client.ws.ping : null,
+        platform: 'https://zenox.lol',
+      })
+    );
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
+  }
+});
+
+server.listen(port, '0.0.0.0', () => {
+  console.log(`\x1b[36m[Zenox Keep-Alive] HTTP server listening on 0.0.0.0:${port} for Render & UptimeRobot\x1b[0m`);
+});
