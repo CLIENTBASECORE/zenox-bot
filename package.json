@@ -1,0 +1,31 @@
+{
+  "name": "zenox-bot",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "test": "node --loader ts-node/esm src/mock-client.ts",
+    "deploy-commands": "node --loader ts-node/esm src/deploy-commands.ts"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.6.3",
+    "axios": "^1.20.0",
+    "cors": "^2.8.6",
+    "discord-api-types": "^0.38.55",
+    "discord.js": "^14.27.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.2",
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "requests": [
+    {
+      "id": "req-mtyr216d",
+      "title": "piemeltjelikken",
+      "type": "movie",
+      "requesterId": "1182592797388324894",
+      "requesterTag": "megatron_031",
+      "requesterAvatar": "https://cdn.discordapp.com/avatars/1182592797388324894/cb0266831cb83241a64f7abec3b12eaf.webp",
+      "status": "rejected",
+      "createdAt": 1789239592309,
+      "updatedAt": 1789240395806,
+      "messageId": "1548407780241702983",
+      "channelId": "1467158033111978032",
+      "staffNotes": "Updated by megatron_031",
+      "reviewedBy": "megatron_031"
+    },
+    {
+      "id": "req-mtypoft8",
+      "title": "Arcadee peppee",
+      "type": "movie",
+      "year": "2028",
+      "requesterId": "1182592797388324894",
+      "requesterTag": "megatron_031",
+      "requesterAvatar": "https://cdn.discordapp.com/avatars/1182592797388324894/cb0266831cb83241a64f7abec3b12eaf.webp",
+      "status": "rejected",
+      "createdAt": 1789237278476,
+      "updatedAt": 1789239968793,
+      "messageId": "1548398075389935647",
+      "channelId": "1467158033111978032",
+      "reviewedBy": "Admin"
+    }
+  ],
+  "watchParties": [
+    {
+      "id": "wp-mtypr6ih",
+      "title": "Moana",
+      "type": "movie",
+      "streamUrl": "https://zenox.lol/watch/zenox.lol",
+      "scheduledTime": 1789238306393,
+      "hostId": "1182592797388324894",
+      "hostTag": "megatron_031",
+      "attendees": [
+        "1182592797388324894"
+      ],
+      "channelId": "1467158033111978030",
+      "messageId": "1548398612004864131"
+    }
+  ],
+  "panels": {},
+  "userColorRoles": {
+    "1182592797388324894": "pink"
+  },
+  "userPingRoles": {
+    "1182592797388324894": []
+  },
+  "userShowRoles": {},
+  "showCounts": {
+    "love_island": 1420,
+    "the_mentalist": 890,
+    "the_rookie": 1150,
+    "prison_break": 1730,
+    "rick_and_morty": 2310,
+    "reacher": 1640,
+    "stranger_things": 2840,
+    "the_boys": 1980
+  },
+  "systemNodes": [
+    {
+      "id": "zenox-web-1",
+      "name": "Zenox Official Web Streaming Platform",
+      "endpoint": "https://zenox.lol",
+      "status": "online",
+      "latencyMs": 17,
+      "uptime": 99.99,
+      "type": "web",
+      "lastChecked": 1789237339556
+    },
+    {
+      "id": "cdn-proxy-edge",
+      "name": "High-Speed HLS Stream Edge",
+      "endpoint": "stream.zenox.lol",
+      "status": "online",
+      "latencyMs": 14,
+      "uptime": 100,
+      "type": "cdn",
+      "lastChecked": 1789237339556
+    },
+    {
+      "id": "zenox-us-east",
+      "name": "Anti-ISP DNS Bypass Gateway",
+      "endpoint": "https://proxy.zenox.lol",
+      "status": "online",
+      "latencyMs": 45,
+      "uptime": 99.9,
+      "type": "proxy",
+      "lastChecked": 1789237339557
+    }
+  ],
+  "colorRoles": [
+    {
+      "id": "pink",
+      "name": "Pink",
+      "emoji": "1️⃣",
+      "hex": "#ec4899",
+      "discordRoleId": "1548407058200530965"
+    },
+    {
+      "id": "purple",
+      "name": "Purple",
+      "emoji": "2️⃣",
+      "hex": "#a855f7",
+      "discordRoleId": "1548407059500892210"
+    },
+    {
+      "id": "blue",
+      "name": "Blue",
+      "emoji": "3️⃣",
+      "hex": "#3b82f6",
+      "discordRoleId": "1548407060780290068"
+    },
+    {
+      "id": "green",
+      "name": "Green",
+      "emoji": "4️⃣",
+      "hex": "#22c55e",
+      "discordRoleId": "1548407061732134982"
+    },
+    {
+      "id": "orange",
+      "name": "Orange",
+      "emoji": "5️⃣",
+      "hex": "#f97316",
+      "discordRoleId": "1548407062436782102"
+    },
+    {
+      "id": "yellow",
+      "name": "Yellow",
+      "emoji": "6️⃣",
+      "hex": "#eab308",
+      "discordRoleId": "1548407063867170886"
+    },
+    {
+      "id": "red",
+      "name": "Red",
+      "emoji": "7️⃣",
+      "hex": "#ef4444",
+      "discordRoleId": "1548407064961880114"
+    }
+  ],
+  "botMessages": [
+    {
+      "id": "1548408082407755808",
+      "channelId": "1467158033111978027",
+      "channelName": "〔💬〕general",
+      "content": "hello @everyone ",
+      "isEmbed": false,
+      "timestamp": 1789239664806
+    },
+    {
+      "id": "1548407423163961456",
+      "channelId": "1467158033111978027",
+      "channelName": "〔💬〕general",
+      "content": " @everyone ",
+      "isEmbed": false,
+      "timestamp": 1789239507498
+    },
+    {
+      "id": "1548407323536658454",
+      "channelId": "1467158033111978027",
+      "channelName": "〔💬〕general",
+      "content": "hiiiii",
+      "isEmbed": false,
+      "timestamp": 1789239483752
+    },
+    {
+      "id": "1548406894803288114",
+      "channelId": "1467158033111978034",
+      "channelName": "〔🤖〕bot-commands",
+      "content": "Greetings from Zenox Bot Console! Ready to stream on https://zenox.lol",
+      "isEmbed": false,
+      "timestamp": 1789239381718
+    },
+    {
+      "id": "1548406864998437045",
+      "channelId": "1467158033111978034",
+      "channelName": "〔🤖〕bot-commands",
+      "content": "The remote bot terminal and Discord integration are now fully linked to **https://zenox.lol**.",
+      "isEmbed": true,
+      "embedTitle": "? Zenox Companion Matrix Synchronized",
+      "timestamp": 1789239374655
+    }
+  ],
+  "adminChannelId": "1467158094579634223",
+  "requestsChannelId": "1467158094579634223"
+}

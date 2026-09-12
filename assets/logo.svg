@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#121614" />
+      <stop offset="100%" stop-color="#080808" />
+    </radialGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur1" />
+      <feGaussianBlur stdDeviation="15" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="intenseGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="22" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Linear Gradients for Visor -->
+    <linearGradient id="neonGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="50%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <linearGradient id="visorGlass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0.1" />
+    </linearGradient>
+
+    <linearGradient id="lensReflect" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Obsidian Rounded Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="#22c55e" stroke-opacity="0.2" stroke-width="2" />
+
+  <!-- Ambient Glow Aura behind visor -->
+  <ellipse cx="256" cy="256" rx="140" ry="60" fill="#22c55e" fill-opacity="0.18" filter="url(#intenseGlow)" />
+
+  <!-- Cyber Visor / Goggles Frame Base -->
+  <path d="M 110 240 
+           C 110 210, 150 195, 235 198 
+           L 256 206 
+           L 277 198 
+           C 362 195, 402 210, 402 240 
+           L 396 272 
+           C 392 300, 360 318, 280 312 
+           L 256 304 
+           L 232 312 
+           C 152 318, 120 300, 116 272 
+           Z" 
+        fill="#0f1110" 
+        stroke="#1a251e" 
+        stroke-width="5" />
+
+  <!-- Glass Inner Glow -->
+  <path d="M 122 242 
+           C 122 220, 158 206, 238 208 
+           L 256 215 
+           L 274 208 
+           C 354 206, 390 220, 390 242 
+           L 384 268 
+           C 380 290, 352 302, 276 298 
+           L 256 290 
+           L 236 298 
+           C 160 302, 132 290, 128 268 
+           Z" 
+        fill="url(#visorGlass)" />
+
+  <!-- The Iconic Neon Visor Sweep Line (Outer) -->
+  <path d="M 126 244 
+           C 134 228, 170 216, 240 218 
+           L 256 224 
+           L 272 218 
+           C 342 216, 378 228, 386 244 
+           L 380 264 
+           C 374 282, 346 292, 274 288 
+           L 256 280 
+           L 238 288 
+           C 166 292, 138 282, 132 264 
+           Z" 
+        fill="none" 
+        stroke="url(#neonGreen)" 
+        stroke-width="5" 
+        stroke-linejoin="round"
+        filter="url(#neonGlow)" />
+
+  <!-- Center HUD Dual Stream HUD Slits -->
+  <line x1="160" y1="250" x2="230" y2="250" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9" />
+  <line x1="282" y1="250" x2="352" y2="250" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9" />
+  
+  <line x1="180" y1="262" x2="225" y2="262" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" filter="url(#neonGlow)" />
+  <line x1="287" y1="262" x2="332" y2="262" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" filter="url(#neonGlow)" />
+
+  <!-- Central Bridge Hex Accent -->
+  <polygon points="256,238 264,244 264,256 256,262 248,256 248,244" fill="#22c55e" filter="url(#neonGlow)" />
+  <circle cx="256" cy="250" r="2.5" fill="#ffffff" />
+
+  <!-- HUD Corner Bracket Accents -->
+  <path d="M 145 236 L 140 236 L 140 248" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" opacity="0.8" />
+  <path d="M 367 236 L 372 236 L 372 248" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" opacity="0.8" />
+
+  <!-- Glass Light Reflection diagonal slice -->
+  <path d="M 148 222 L 230 222 L 180 286 L 140 286 Z" fill="url(#lensReflect)" opacity="0.18" />
+
+  <!-- Brand Subtext: Z E N O X -->
+  <text x="256" y="380" 
+        font-family="'Inter', 'Outfit', system-ui, -apple-system, sans-serif" 
+        font-size="28" 
+        font-weight="800" 
+        letter-spacing="12" 
+        fill="#ffffff" 
+        text-anchor="middle"
+        opacity="0.95">ZENOX</text>
+        
+  <text x="256" y="406" 
+        font-family="'Inter', system-ui, -apple-system, sans-serif" 
+        font-size="11" 
+        font-weight="600" 
+        letter-spacing="4" 
+        fill="#22c55e" 
+        text-anchor="middle"
+        filter="url(#neonGlow)">PREMIUM CINEMA NETWORK</text>
+</svg>
