@@ -74,7 +74,7 @@ export class AiChatService {
       else if (/action|fight|war/i.test(p)) genre = 'Action';
       else if (/anime|animation/i.test(p)) genre = 'Animation/Anime';
 
-      const randomItem = CatalogService.getRandom();
+      const randomItem = await CatalogService.getRandom(undefined, genre || undefined);
 
       if (genre) {
         return (

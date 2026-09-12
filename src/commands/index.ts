@@ -123,20 +123,38 @@ export const searchCommand: Command = {
 export const trendingCommand: Command = {
   data: new SlashCommandBuilder()
     .setName('trending')
-    .setDescription('View the top 5 trending movies & TV shows on Zenox today'),
+    .setDescription('View the top 5 trending movies & TV shows on Zenox today (live TMDB)'),
   async execute(interaction) {
     await interaction.deferReply();
-    const trending = CatalogService.getTrending();
+    const trending = await CatalogService.getTrending();
     const payload = ZenoxEmbeds.trendingList(trending);
     await interaction.editReply(payload);
   },
 };
 
-// 3. /random [type] [genre]
+// 3. /random [genre] [type]
 export const randomCommand: Command = {
   data: new SlashCommandBuilder()
     .setName('random')
-    .setDescription('Pick a high-rated random title to watch on Zenox')
+    .setDescription('Pick a random high-rated title from TMDB Trending, Popular, or by Genre')
+    .addStringOption(opt =>
+      opt
+        .setName('genre')
+        .setDescription('Filter by genre (e.g. Action, Comedy, Horror, Sci-Fi, Drama)')
+        .setRequired(false)
+        .addChoices(
+          { name: '💥 Action', value: 'action' },
+          { name: '😂 Comedy', value: 'comedy' },
+          { name: '😱 Horror', value: 'horror' },
+          { name: '🚀 Sci-Fi', value: 'sci-fi' },
+          { name: '🎭 Drama', value: 'drama' },
+          { name: '🔪 Thriller', value: 'thriller' },
+          { name: '⛩️ Animation / Anime', value: 'animation' },
+          { name: '💖 Romance', value: 'romance' },
+          { name: '🧙 Fantasy', value: 'fantasy' },
+          { name: '🕵️ Crime / Mystery', value: 'crime' }
+        )
+    )
     .addStringOption(opt =>
       opt
         .setName('type')
@@ -146,16 +164,13 @@ export const randomCommand: Command = {
           { name: '🎬 Movie', value: 'movie' },
           { name: '📺 TV Series', value: 'tv' }
         )
-    )
-    .addStringOption(opt =>
-      opt.setName('genre').setDescription('Filter by genre (e.g. Sci-Fi, Action, Animation)').setRequired(false)
     ),
   async execute(interaction) {
     await interaction.deferReply();
     const type = interaction.options.getString('type') as 'movie' | 'tv' | null;
     const genre = interaction.options.getString('genre') || undefined;
 
-    const item = CatalogService.getRandom(type || undefined, genre);
+    const item = await CatalogService.getRandom(type || undefined, genre);
     const payload = ZenoxEmbeds.mediaDetail(item);
     await interaction.editReply(payload);
   },

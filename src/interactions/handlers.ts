@@ -10,6 +10,8 @@ import { db } from '../database/db.js';
 import { ZenoxEmbeds } from '../utils/embeds.js';
 import { StatusService } from '../services/status.js';
 import { CatalogService } from '../services/catalog.js';
+import { CONFIG } from '../config.js';
+import { WatchParty } from '../types/index.js';
 
 export async function handleButtonInteraction(interaction: ButtonInteraction): Promise<void> {
   const customId = interaction.customId;
@@ -143,9 +145,9 @@ export async function handleButtonInteraction(interaction: ButtonInteraction): P
   }
 
   // 7. Random reroll
-  if (customId === 'random_reroll') {
+  if (customId === 'random_reroll' || customId.startsWith('random_reroll_')) {
     await interaction.deferUpdate();
-    const item = CatalogService.getRandom();
+    const item = await CatalogService.getRandom();
     const payload = ZenoxEmbeds.mediaDetail(item);
     await interaction.editReply(payload as any);
     return;
@@ -155,9 +157,46 @@ export async function handleButtonInteraction(interaction: ButtonInteraction): P
   if (customId.startsWith('share_')) {
     const mediaId = customId.replace('share_', '');
     const catalog = CatalogService.getCatalog();
-    const item = catalog.find(m => m.id === mediaId) || CatalogService.getRandom();
+    const item = catalog.find(m => m.id === mediaId) || (await CatalogService.getRandom());
     await interaction.reply({
       content: `🎬 Stream **${item.title}** (${item.year}) on Zenox: ${item.zenoxUrl}`,
+    });
+    return;
+  }
+
+  // 9. Host Watch Party (from media detail card)
+  if (customId.startsWith('watchparty_host_')) {
+    const mediaId = customId.replace('watchparty_host_', '');
+    const embed = interaction.message.embeds[0];
+    const rawTitle = embed?.title || 'Community Watch Party';
+    const cleanTitle = rawTitle.replace(/\s*\(\d{4}\)$/, '').trim();
+    const streamUrl = embed?.url || `${CONFIG.ZENOX_BASE_URL}/watch/${mediaId}`;
+    const scheduledTime = Date.now() + 15 * 60 * 1000;
+
+    const wp: WatchParty = {
+      id: `wp-${Date.now().toString(36)}`,
+      title: cleanTitle,
+      type: mediaId.startsWith('tv') ? 'series' : 'movie',
+      streamUrl,
+      scheduledTime,
+      channelId: interaction.channelId,
+      hostId: interaction.user.id,
+      hostTag: interaction.user.tag,
+      attendees: [interaction.user.id],
+      messageId: '',
+    };
+
+    db.addWatchParty(wp);
+    const payload = ZenoxEmbeds.watchParty(wp);
+
+    if (interaction.channel && 'send' in interaction.channel) {
+      const sent = await (interaction.channel as any).send(payload);
+      wp.messageId = sent.id;
+    }
+
+    await interaction.reply({
+      content: `🍿 **Watch Party Scheduled!** You started a watch party for **${cleanTitle}** (starts <t:${Math.floor(scheduledTime / 1000)}:R>). The RSVP card has been posted into this channel!`,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }

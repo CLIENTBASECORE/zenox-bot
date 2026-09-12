@@ -37,7 +37,7 @@ async function testSuite() {
 
   // 5. Test Trending
   console.log('5. Testing Trending ("/trending")...');
-  const trending = CatalogService.getTrending();
+  const trending = await CatalogService.getTrending();
   const trendingEmbed = ZenoxEmbeds.trendingList(trending);
   console.log(`   Trending Count: ${trending.length}`);
   console.log(`   Embed Title: "${trendingEmbed.embeds[0].data.title}"`);

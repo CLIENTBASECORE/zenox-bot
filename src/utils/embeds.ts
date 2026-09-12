@@ -176,7 +176,7 @@ export class ZenoxEmbeds {
   // ==========================================
 
   public static mediaDetail(item: MediaItem): { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] } {
-    const ratingStars = '★'.repeat(Math.floor(item.rating / 2)) + '☆'.repeat(5 - Math.floor(item.rating / 2));
+    const ratingStars = '★'.repeat(Math.min(5, Math.max(0, Math.floor(item.rating / 2)))) + '☆'.repeat(Math.max(0, 5 - Math.min(5, Math.floor(item.rating / 2))));
     const typeBadge = item.type === 'movie' ? '🎬 MOVIE' : '📺 TV SERIES';
 
     const embed = new EmbedBuilder()
@@ -187,8 +187,12 @@ export class ZenoxEmbeds {
       .setImage(item.backdropUrl)
       .setThumbnail(item.posterUrl)
       .addFields(
-        { name: '⭐ Rating', value: `\`${item.rating}/10\` ${ratingStars} (${item.votes.toLocaleString()} votes)`, inline: true },
-        { name: '🎞️ Format', value: `\`${typeBadge}\` • \`${item.quality}\``, inline: true },
+        {
+          name: '⭐ Rating & Reviews',
+          value: `**${item.rating}/10** ${ratingStars}\n\`${item.votes.toLocaleString()}\` TMDB verified reviews`,
+          inline: true,
+        },
+        { name: '🎞️ Format & Quality', value: `\`${typeBadge}\` • \`${item.quality}\``, inline: true },
         { name: '🏷️ Genres', value: item.genres.map(g => `\`${g}\``).join(' '), inline: true }
       )
       .setFooter({
@@ -209,14 +213,18 @@ export class ZenoxEmbeds {
         .setStyle(ButtonStyle.Link)
         .setURL(item.zenoxUrl),
       new ButtonBuilder()
-        .setCustomId(`share_${item.id}`)
-        .setLabel('Share Title')
-        .setEmoji('🔗')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId(`request_wp_${item.id}`)
+        .setCustomId(`watchparty_host_${item.id}`)
         .setLabel('Host Watch Party')
         .setEmoji('🍿')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId('random_reroll')
+        .setLabel('🎲 Roll Another')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(`share_${item.id}`)
+        .setLabel('Share')
+        .setEmoji('🔗')
         .setStyle(ButtonStyle.Secondary)
     );
 
@@ -224,13 +232,13 @@ export class ZenoxEmbeds {
   }
 
   public static trendingList(items: MediaItem[]): { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] } {
-    let desc = `Top trending titles currently streaming on **Zenox**:\n\n`;
+    let desc = `Top trending movies and TV series streaming on **Zenox** today (verified by live TMDB charts):\n\n`;
 
     items.forEach((item, index) => {
       const medal = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][index] || '▶';
       const icon = item.type === 'movie' ? '🎬' : '📺';
       desc += `${medal} ${icon} **[${item.title}](${item.zenoxUrl})** (${item.year})\n`;
-      desc += `↳ ⭐ \`${item.rating}/10\` • \`${item.quality}\` • *${item.genres.join(', ')}*\n\n`;
+      desc += `↳ ⭐ **${item.rating}/10** (\`${item.votes.toLocaleString()}\` TMDB reviews) • \`${item.quality}\` • *${item.genres.join(', ')}*\n\n`;
     });
 
     const embed = new EmbedBuilder()
@@ -239,7 +247,7 @@ export class ZenoxEmbeds {
       .setColor(ZENOX_COLORS.emerald)
       .setImage(items[0]?.backdropUrl || null)
       .setFooter({
-        text: 'Zenox Daily Charts • Updated every hour',
+        text: 'Zenox Daily Charts • Powered by Live TMDB Data',
         iconURL: ZENOX_BRANDING.avatarUrl,
       });
 
@@ -343,16 +351,22 @@ export class ZenoxEmbeds {
         iconURL: ZENOX_BRANDING.avatarUrl,
       });
 
+    const partyRoomUrl = wp.streamUrl.includes('?') ? `${wp.streamUrl}&watchparty=1` : `${wp.streamUrl}?watchparty=1`;
+
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(`wp_rsvp_${wp.id}`)
-        .setLabel(`RSVP / Remind Me (${wp.attendees.length})`)
+        .setLabel(`RSVP / Join (${wp.attendees.length})`)
         .setEmoji('🎟️')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
-        .setLabel('▶ Open Stream Player')
+        .setLabel('▶ Stream on Zenox')
         .setStyle(ButtonStyle.Link)
-        .setURL(wp.streamUrl)
+        .setURL(wp.streamUrl),
+      new ButtonBuilder()
+        .setLabel('🍿 Zenox Watch Party Room')
+        .setStyle(ButtonStyle.Link)
+        .setURL(partyRoomUrl)
     );
 
     return { embeds: [embed], components: [row] };
@@ -488,13 +502,14 @@ export class ZenoxEmbeds {
         `• **Example:** \`${p}movie Inception\` or \`${p}series Breaking Bad\`\n\n` +
         `### 2. \`${p}trending\` • \`/trending\`\n` +
         `• **Aliases:** \`${p}top\`\n` +
-        `• **Description:** Displays the top 5 trending movies & TV shows on Zenox today with posters, ratings, and instant stream buttons.\n` +
+        `• **Description:** Displays the top 5 trending movies & TV shows on Zenox today with verified TMDB ratings, review counts, and instant stream buttons.\n` +
         `• **Prefix Format:** \`${p}trending\`\n\n` +
-        `### 3. \`${p}random [type] [genre]\` • \`/random\`\n` +
+        `### 3. \`${p}random [genre|type]\` • \`/random [genre] [type]\`\n` +
         `• **Aliases:** \`${p}roll\`\n` +
-        `• **Description:** Picks a high-rated title to watch, with an interactive re-roll button.\n` +
-        `• **Prefix Format:** \`${p}random [movie|tv] [genre]\`\n` +
-        `• **Example:** \`${p}random\` • \`${p}random movie Action\` • \`${p}random tv Sci-Fi\`\n\n` +
+        `• **Description:** Dynamically pulls a high-rated title from live TMDB Trending, Popular, and Top-Rated libraries. Every roll is genuinely different. If a genre is provided (e.g. Action, Horror, Comedy, Sci-Fi, Thriller), it guarantees a title from that specific genre!\n` +
+        `• **Prefix Format:** \`${p}random [genre]\` or \`${p}random [movie|tv] [genre]\`\n` +
+        `• **Slash Format:** \`/random [genre:action] [type:movie]\`\n` +
+        `• **Example:** \`${p}random action\` • \`${p}random comedy\` • \`${p}random movie horror\` • \`${p}random tv drama\`\n\n` +
         `### 4. \`${p}nowplaying <title> | [year] | [quality]\` • \`/nowplaying\`\n` +
         `• **Aliases:** \`${p}np\`\n` +
         `• **Description:** Broadcasts what movie or episode you are currently streaming to the server.\n` +
@@ -502,7 +517,7 @@ export class ZenoxEmbeds {
         `• **Example:** \`${p}nowplaying Dune: Part Two | 2024 | 4K HDR\`\n\n` +
         `### 5. \`${p}watchparty <title> | <minutes> | [url]\` • \`/watchparty\`\n` +
         `• **Aliases:** \`${p}wp\`\n` +
-        `• **Description:** Schedules a community watch party event with interactive RSVP counter buttons.\n` +
+        `• **Description:** Schedules a community watch party event with interactive RSVP counter buttons, live countdown, and direct Zenox room links. You can also click the **🍿 Host Watch Party** button on any movie/series card to launch one instantly!\n` +
         `• **Prefix Format:** \`${p}watchparty <title> | <minutes from now> | [link]\`\n` +
         `• **Example:** \`${p}watchparty Interstellar | 30 | https://zenox.lol/watch/157336\``;
     } else if (page === 2) {

@@ -108,7 +108,8 @@ export async function handlePrefixMessage(message: Message, client: Client): Pro
       // 4. TRENDING / TOP
       case 'trending':
       case 'top': {
-        const trending = CatalogService.getTrending();
+        if ('sendTyping' in message.channel) await message.channel.sendTyping();
+        const trending = await CatalogService.getTrending();
         const payload = ZenoxEmbeds.trendingList(trending);
         await message.reply(payload);
         return;
@@ -117,20 +118,28 @@ export async function handlePrefixMessage(message: Message, client: Client): Pro
       // 5. RANDOM / ROLL
       case 'random':
       case 'roll': {
+        if ('sendTyping' in message.channel) await message.channel.sendTyping();
+
         let type: 'movie' | 'tv' | undefined = undefined;
         let genre: string | undefined = undefined;
 
-        if (args[0] && (args[0].toLowerCase() === 'movie' || args[0].toLowerCase() === 'film')) {
+        const lowerArgs = args.map(a => a.toLowerCase());
+        if (lowerArgs[0] === 'movie' || lowerArgs[0] === 'film') {
           type = 'movie';
-          genre = args.slice(1).join(' ') || undefined;
-        } else if (args[0] && (args[0].toLowerCase() === 'tv' || args[0].toLowerCase() === 'series' || args[0].toLowerCase() === 'show')) {
+          if (lowerArgs.length > 1) {
+            genre = lowerArgs.slice(1).join(' ');
+          }
+        } else if (lowerArgs[0] === 'tv' || lowerArgs[0] === 'series' || lowerArgs[0] === 'show') {
           type = 'tv';
-          genre = args.slice(1).join(' ') || undefined;
-        } else if (args.length > 0) {
-          genre = args.join(' ');
+          if (lowerArgs.length > 1) {
+            genre = lowerArgs.slice(1).join(' ');
+          }
+        } else if (lowerArgs.length > 0) {
+          // e.g. !random action, !random comedy, !random horror
+          genre = lowerArgs.join(' ');
         }
 
-        const item = CatalogService.getRandom(type, genre);
+        const item = await CatalogService.getRandom(type, genre);
         const payload = ZenoxEmbeds.mediaDetail(item);
         await message.reply(payload);
         return;
