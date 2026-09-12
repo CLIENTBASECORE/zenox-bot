@@ -14,4 +14,5 @@ export const CONFIG = {
   ZENOX_BASE_URL: process.env.ZENOX_BASE_URL || 'https://zenox.lol',
   NODE_ENV: process.env.NODE_ENV || 'development',
   DASHBOARD_SECRET: process.env.DASHBOARD_SECRET || 'zenox-cyber-secret-2026',
+  PREFIX: process.env.BOT_PREFIX || '!',
 };

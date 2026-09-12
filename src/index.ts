@@ -10,8 +10,10 @@ import {
   PermissionFlagsBits,
 } from 'discord.js';
 import { CONFIG } from './config.js';
+import { db } from './database/db.js';
 import { ALL_COMMANDS } from './commands/index.js';
 import { handleButtonInteraction, handleSelectInteraction } from './interactions/handlers.js';
+import { handlePrefixMessage } from './commands/prefixHandler.js';
 import { deployCommands } from './deploy-commands.js';
 import { AiChatService } from './services/aiChat.js';
 
@@ -30,11 +32,12 @@ console.log(`
   \x1b[90m└──────────────────────────────────────────────────┘\x1b[0m
 `);
 
-// Initialize Discord Client
+// Initialize Discord Client with MessageContent for custom prefix commands
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ],
 });
 
@@ -145,11 +148,15 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
   }
 });
 
-// Event: Message Create (Mention bot to talk with Zenox AI)
+// Event: Message Create (Prefix commands & AI Chat Mentions)
 client.on(Events.MessageCreate, async message => {
   if (message.author.bot) return;
 
-  if (client.user && message.mentions.has(client.user)) {
+  // 1. Process custom prefix commands (e.g. !help, !movie, !status, etc.)
+  await handlePrefixMessage(message, client);
+
+  // 2. Mention bot to talk with Zenox AI (if not a prefix command)
+  if (client.user && message.mentions.has(client.user) && !message.content.startsWith(db.getPrefix())) {
     try {
       const prompt = message.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '').trim();
       const cleanPrompt = prompt || 'hello';

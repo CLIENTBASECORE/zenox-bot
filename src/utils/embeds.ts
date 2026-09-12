@@ -443,4 +443,191 @@ export class ZenoxEmbeds {
 
     return embed;
   }
+
+  /**
+   * Interactive Paginated Help Menu with Category Buttons and Navigation
+   */
+  public static createHelpMenu(
+    pageIndex: number = 0,
+    activePrefix: string = '!'
+  ): { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] } {
+    const p = activePrefix;
+    const page = Math.max(0, Math.min(3, pageIndex));
+
+    let title = '';
+    let desc = '';
+    let categoryName = '';
+
+    if (page === 0) {
+      categoryName = 'Overview';
+      title = '🌟 Zenox Cinema • Command & Prefix Manual';
+      desc =
+        `Welcome to the **Zenox Cinema Discord Bot**!\n` +
+        `You can interact with the bot using **Slash Commands** (\`/command\`) or **Custom Prefix Commands** (\`${p}command\`).\n\n` +
+        `**Current Server Prefix:** \`${p}\` *(Change anytime with \`${p}prefix <symbol>\` or \`/adminsetup prefix\`)*\n` +
+        `**Official Platform:** [zenox.lol](https://zenox.lol) • High-Speed Ad-Free Streaming\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `### 📂 Select a Category Below:\n\n` +
+        `• **🎬 Media & Streaming (Page 2)**\n` +
+        `  Search TMDB catalog, view trending, roll random titles, broadcast now playing, schedule watch parties.\n\n` +
+        `• **💬 Community & Requests (Page 3)**\n` +
+        `  Request missing movies/series, public ticket queue, chat with Zenox AI, node latency, domain mirrors.\n\n` +
+        `• **🛡️ Administrator & Setup (Page 4)**\n` +
+        `  Server setup suite, broadcast announcements, say messages, deploy self-assign role panels, prefix settings.\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `💡 *Click the category buttons below to jump directly, or use \`◀️ Back\` and \`Next ▶️\` to browse!*`;
+    } else if (page === 1) {
+      categoryName = 'Media & Catalog';
+      title = '🎬 Media & Catalog Commands';
+      desc =
+        `Search movies, TV series, anime, and host watch parties on Zenox.\n\n` +
+        `### 1. \`${p}search <query>\` • \`/search <query>\`\n` +
+        `• **Aliases:** \`${p}movie\`, \`${p}series\`, \`${p}anime\`, \`${p}find\`\n` +
+        `• **Description:** Searches the Zenox TMDB catalog and generates an interactive detail card with direct stream links, genres, ratings, and synopsis.\n` +
+        `• **Prefix Format:** \`${p}search <title>\` or \`${p}movie <title>\`\n` +
+        `• **Example:** \`${p}movie Inception\` or \`${p}series Breaking Bad\`\n\n` +
+        `### 2. \`${p}trending\` • \`/trending\`\n` +
+        `• **Aliases:** \`${p}top\`\n` +
+        `• **Description:** Displays the top 5 trending movies & TV shows on Zenox today with posters, ratings, and instant stream buttons.\n` +
+        `• **Prefix Format:** \`${p}trending\`\n\n` +
+        `### 3. \`${p}random [type] [genre]\` • \`/random\`\n` +
+        `• **Aliases:** \`${p}roll\`\n` +
+        `• **Description:** Picks a high-rated title to watch, with an interactive re-roll button.\n` +
+        `• **Prefix Format:** \`${p}random [movie|tv] [genre]\`\n` +
+        `• **Example:** \`${p}random\` • \`${p}random movie Action\` • \`${p}random tv Sci-Fi\`\n\n` +
+        `### 4. \`${p}nowplaying <title> | [year] | [quality]\` • \`/nowplaying\`\n` +
+        `• **Aliases:** \`${p}np\`\n` +
+        `• **Description:** Broadcasts what movie or episode you are currently streaming to the server.\n` +
+        `• **Prefix Format:** \`${p}nowplaying <title> | [year] | [quality]\`\n` +
+        `• **Example:** \`${p}nowplaying Dune: Part Two | 2024 | 4K HDR\`\n\n` +
+        `### 5. \`${p}watchparty <title> | <minutes> | [url]\` • \`/watchparty\`\n` +
+        `• **Aliases:** \`${p}wp\`\n` +
+        `• **Description:** Schedules a community watch party event with interactive RSVP counter buttons.\n` +
+        `• **Prefix Format:** \`${p}watchparty <title> | <minutes from now> | [link]\`\n` +
+        `• **Example:** \`${p}watchparty Interstellar | 30 | https://zenox.lol/watch/157336\``;
+    } else if (page === 2) {
+      categoryName = 'Community & Requests';
+      title = '💬 Community & Request Commands';
+      desc =
+        `Submit content requests, talk to Zenox AI, check server status, and official mirrors.\n\n` +
+        `### 1. \`${p}request <type> <title> | [notes]\` • \`/request\`\n` +
+        `• **Aliases:** \`${p}req\`\n` +
+        `• **Description:** Submit a request for missing movies, anime, or series to the Zenox team. Opens an interactive staff ticket.\n` +
+        `• **Prefix Format:** \`${p}request <movie|series|anime> <title> | [notes]\` *(or \`${p}request <title>\`)*\n` +
+        `• **Example:** \`${p}request movie Fight Club | 1080p BluRay\`\n` +
+        `• **Example:** \`${p}request series Severance | Please add Season 2\`\n\n` +
+        `### 2. \`${p}requests [list|pending]\` • \`/requests list\`\n` +
+        `• **Aliases:** \`${p}reqs\`\n` +
+        `• **Description:** View public community media requests and their status (Pending, Approved, Added, Rejected).\n` +
+        `• **Prefix Format:** \`${p}requests\` or \`${p}requests list\`\n\n` +
+        `### 3. \`${p}chat <question>\` • \`/chat prompt:<text>\`\n` +
+        `• **Aliases:** \`${p}ai\`, \`${p}ask\`\n` +
+        `• **Description:** Ask Zenox Cinema AI for recommendations, trivia, actors, or streaming help. *(You can also directly @mention the bot!)*\n` +
+        `• **Prefix Format:** \`${p}chat <message>\`\n` +
+        `• **Example:** \`${p}chat Recommend me 3 psychological thrillers like Shutter Island\`\n\n` +
+        `### 4. \`${p}status\` • \`/status\`\n` +
+        `• **Aliases:** \`${p}ping\`\n` +
+        `• **Description:** Checks live health, CDN edge latency, and streaming node status for zenox.lol.\n` +
+        `• **Prefix Format:** \`${p}status\`\n\n` +
+        `### 5. \`${p}domain\` • \`/domain\`\n` +
+        `• **Aliases:** \`${p}site\`, \`${p}url\`, \`${p}link\`, \`${p}mirrors\`\n` +
+        `• **Description:** Displays official Zenox domains, proxy bypass URLs, and mirror statuses.\n` +
+        `• **Prefix Format:** \`${p}domain\`\n\n` +
+        `### 6. \`${p}botinfo\` • \`/botinfo\`\n` +
+        `• **Aliases:** \`${p}info\`, \`${p}about\`\n` +
+        `• **Description:** Displays bot uptime, memory usage, gateway ping, and cloud architecture.\n` +
+        `• **Prefix Format:** \`${p}botinfo\``;
+    } else {
+      categoryName = 'Admin & Setup';
+      title = '🛡️ Administrator & Setup Commands';
+      desc =
+        `🔒 **Security Notice:** Administrator commands require the \`Administrator\` permission and must be run inside the designated admin chat!\n\n` +
+        `### 1. \`${p}adminsetup <subcommand> [args]\` • \`/adminsetup\`\n` +
+        `• **Description:** Master configuration suite to bind channels, sync roles, unlock permissions, and customize prefix.\n` +
+        `• **Subcommands:**\n` +
+        `  ↳ \`${p}adminsetup status\` — View active channels, role sync, and ticket stats\n` +
+        `  ↳ \`${p}adminsetup channel <#channel>\` — Set dedicated admin chat\n` +
+        `  ↳ \`${p}adminsetup requests_channel <#channel>\` — Set media request tickets channel\n` +
+        `  ↳ \`${p}adminsetup prefix <symbol>\` — Set custom command prefix (e.g. \`!\`, \`?\`, \`.\`)\n` +
+        `  ↳ \`${p}adminsetup unlock_commands\` — Ensure commands are unlocked for all members\n` +
+        `  ↳ \`${p}adminsetup color_roles [#channel]\` — Create/sync 7 color roles & deploy panel\n` +
+        `  ↳ \`${p}adminsetup movie_roles [#channel]\` — Create/sync TV show spoiler roles & deploy panel\n` +
+        `  ↳ \`${p}adminsetup ping_roles [#channel]\` — Create/sync notification alert roles & deploy panel\n\n` +
+        `### 2. \`${p}prefix [new_prefix]\`\n` +
+        `• **Description:** View current prefix, or change it *(Administrator only)*.\n` +
+        `• **Prefix Format:** \`${p}prefix\` (view) or \`${p}prefix <new>\` (change)\n` +
+        `• **Example:** \`${p}prefix ?\`\n\n` +
+        `### 3. \`${p}say <#channel> <message>\` • \`/say\`\n` +
+        `• **Description:** Send a message or embed to any server channel as the bot.\n` +
+        `• **Prefix Format:** \`${p}say <#channel> <message>\`\n` +
+        `• **Example:** \`${p}say #general Welcome to Zenox Cinema!\`\n\n` +
+        `### 4. \`${p}announce <#channel> <title> | <message>\` • \`/announce\`\n` +
+        `• **Description:** Broadcast a styled Zenox Cinema announcement with banner embed.\n` +
+        `• **Prefix Format:** \`${p}announce <#channel> <Title> | <Description>\`\n` +
+        `• **Example:** \`${p}announce #announcements 4K Remux Updates | 20 new movies added!\`\n\n` +
+        `### 5. \`${p}panel <type> [#channel]\` • \`/panel\`\n` +
+        `• **Description:** Deploy interactive role self-assign panels (Colors, Pings, Shows, All).\n` +
+        `• **Prefix Format:** \`${p}panel <colors|pings|shows|all> [#channel]\`\n` +
+        `• **Example:** \`${p}panel colors #roles\` or \`${p}panel all #roles\`\n\n` +
+        `### 6. \`${p}requests resolve <id> <status> [notes]\` • \`/requests resolve\`\n` +
+        `• **Description:** Resolve a user's movie request ticket and send them a DM update.\n` +
+        `• **Prefix Format:** \`${p}requests resolve <req-id> <approved|added|rejected> [notes]\`\n` +
+        `• **Example:** \`${p}requests resolve req-123 added Live on zenox.lol! enjoy!\``;
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle(title)
+      .setColor(page === 3 ? ZENOX_COLORS.violet : ZENOX_COLORS.emerald)
+      .setDescription(desc)
+      .setFooter({
+        text: `Zenox Help Manual • Page ${page + 1} of 4 • Category: ${categoryName}`,
+        iconURL: ZENOX_BRANDING.avatarUrl,
+      })
+      .setTimestamp();
+
+    // Row 1: Direct Category Buttons
+    const categoryRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId('help_cat_0')
+        .setLabel('🏠 Overview')
+        .setStyle(page === 0 ? ButtonStyle.Primary : ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('help_cat_1')
+        .setLabel('🎬 Media')
+        .setStyle(page === 1 ? ButtonStyle.Primary : ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('help_cat_2')
+        .setLabel('💬 Community')
+        .setStyle(page === 2 ? ButtonStyle.Primary : ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('help_cat_3')
+        .setLabel('🛡️ Admin')
+        .setStyle(page === 3 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+    );
+
+    // Row 2: Navigation & Controls
+    const navRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId(`help_prev_${page}`)
+        .setLabel('◀️ Back')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(page === 0),
+      new ButtonBuilder()
+        .setCustomId('help_indicator')
+        .setLabel(`Page ${page + 1} / 4`)
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(true),
+      new ButtonBuilder()
+        .setCustomId(`help_next_${page}`)
+        .setLabel('Next ▶️')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(page === 3),
+      new ButtonBuilder()
+        .setCustomId('help_close')
+        .setLabel('❌ Close')
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    return { embeds: [embed], components: [categoryRow, navRow] };
+  }
 }

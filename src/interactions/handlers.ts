@@ -161,6 +161,42 @@ export async function handleButtonInteraction(interaction: ButtonInteraction): P
     });
     return;
   }
+
+  // 9. Paginated Help Menu Buttons
+  if (customId === 'help_close') {
+    try {
+      await interaction.message.delete();
+    } catch {
+      await interaction.update({ content: '🔒 *Help menu closed.*', embeds: [], components: [] });
+    }
+    return;
+  }
+
+  if (customId.startsWith('help_cat_')) {
+    const page = parseInt(customId.replace('help_cat_', ''), 10) || 0;
+    const prefix = db.getPrefix();
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    await interaction.update(payload as any);
+    return;
+  }
+
+  if (customId.startsWith('help_prev_')) {
+    const cur = parseInt(customId.replace('help_prev_', ''), 10) || 0;
+    const page = Math.max(0, cur - 1);
+    const prefix = db.getPrefix();
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    await interaction.update(payload as any);
+    return;
+  }
+
+  if (customId.startsWith('help_next_')) {
+    const cur = parseInt(customId.replace('help_next_', ''), 10) || 0;
+    const page = Math.min(3, cur + 1);
+    const prefix = db.getPrefix();
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    await interaction.update(payload as any);
+    return;
+  }
 }
 
 export async function handleSelectInteraction(interaction: StringSelectMenuInteraction): Promise<void> {

@@ -6,6 +6,7 @@ import {
   TextChannel,
   MessageFlags,
   EmbedBuilder,
+  Message,
 } from 'discord.js';
 import { CatalogService } from '../services/catalog.js';
 import { StatusService } from '../services/status.js';
@@ -22,7 +23,7 @@ export interface Command {
 }
 
 /**
- * Strict verification helper for Administrator-only commands:
+ * Strict verification helper for Administrator-only slash commands:
  * 1. Checks if member has Administrator permission.
  * 2. Checks if the command is being executed inside the designated admin channel ID.
  */
@@ -57,6 +58,35 @@ export async function ensureAdminContext(
         content: `⚠️ **Admin Chat Required**: Please designate an admin channel first using \`/adminsetup channel [admin_channel]\`, or set \`ADMIN_CHANNEL_ID\` in your \`.env\` file.`,
         flags: MessageFlags.Ephemeral,
       });
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Strict verification helper for Administrator-only prefix text commands:
+ */
+export async function ensureAdminContextForMessage(
+  message: Message,
+  options?: { allowConfigChannel?: boolean }
+): Promise<boolean> {
+  if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
+    await message.reply('❌ **Access Denied**: You must have the `Administrator` permission in this Discord server to use this command.');
+    return false;
+  }
+
+  const adminChanId = db.getAdminChannelId();
+  if (adminChanId) {
+    const channelExists = message.guild?.channels.cache.has(adminChanId);
+    if (channelExists && message.channelId !== adminChanId) {
+      await message.reply(`🔒 **Admin Channel Restricted**: Administrator commands can only be performed in the designated admin chat: <#${adminChanId}>.`);
+      return false;
+    }
+  } else {
+    if (!options?.allowConfigChannel) {
+      await message.reply(`⚠️ **Admin Chat Required**: Please designate an admin channel first using \`${db.getPrefix()}adminsetup channel #channel\` or \`/adminsetup channel\`, or set \`ADMIN_CHANNEL_ID\` in your \`.env\` file.`);
       return false;
     }
   }
@@ -763,6 +793,17 @@ export const adminsetupCommand: Command = {
       sub
         .setName('unlock_commands')
         .setDescription('Ensure public commands work for everyone in all server channels')
+    )
+    .addSubcommand(sub =>
+      sub
+        .setName('prefix')
+        .setDescription('Set custom command prefix for text messages (e.g. !, ?, ., $)')
+        .addStringOption(opt =>
+          opt
+            .setName('prefix')
+            .setDescription('New prefix character/string')
+            .setRequired(true)
+        )
     ),
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
@@ -1062,10 +1103,61 @@ export const adminsetupCommand: Command = {
       await interaction.editReply({ embeds: [embed] });
       return;
     }
+
+    if (subcommand === 'prefix') {
+      if (!(await ensureAdminContext(interaction, { allowConfigChannel: true }))) return;
+      const newPrefix = interaction.options.getString('prefix', true).trim();
+      db.setPrefix(newPrefix);
+
+      const embed = new EmbedBuilder()
+        .setTitle('⚡ Custom Command Prefix Updated')
+        .setColor(ZENOX_COLORS.emerald)
+        .setDescription(
+          `The bot command prefix for **${guild.name}** has been updated to: \`${newPrefix}\`\n\n` +
+          `• **Example Usage**: \`${newPrefix}help\`, \`${newPrefix}movie Inception\`, \`${newPrefix}status\`\n` +
+          `• **Slash Commands**: \`/help\`, \`/movie\`, etc. remain active alongside prefix commands.\n` +
+          `• **Change Anytime**: Use \`${newPrefix}prefix <symbol>\` or \`/adminsetup prefix\``
+        )
+        .setFooter({ text: 'Zenox Configuration Manager • zenox.lol', iconURL: ZENOX_BRANDING.avatarUrl });
+
+      await interaction.reply({ embeds: [embed] });
+      return;
+    }
+  },
+};
+
+// 16. /help [category] (Interactive Paginated Categorized Help Manual)
+export const helpCommand: Command = {
+  data: new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Interactive manual for all Zenox bot commands and custom prefix formats')
+    .addStringOption(opt =>
+      opt
+        .setName('category')
+        .setDescription('Jump directly to a specific command category')
+        .setRequired(false)
+        .addChoices(
+          { name: '🏠 Overview & Guide', value: 'overview' },
+          { name: '🎬 Media & Catalog', value: 'media' },
+          { name: '💬 Community & Requests', value: 'community' },
+          { name: '🛡️ Administrator & Setup', value: 'admin' }
+        )
+    ),
+  async execute(interaction) {
+    const category = interaction.options.getString('category');
+    let page = 0;
+    if (category === 'media') page = 1;
+    else if (category === 'community') page = 2;
+    else if (category === 'admin') page = 3;
+
+    const prefix = db.getPrefix();
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    await interaction.reply(payload);
   },
 };
 
 export const ALL_COMMANDS: Command[] = [
+  helpCommand,
   searchCommand,
   trendingCommand,
   randomCommand,

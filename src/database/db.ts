@@ -27,6 +27,7 @@ interface DatabaseSchema {
   botMessages: BotChatMessage[];
   adminChannelId?: string;
   requestsChannelId?: string;
+  customPrefix?: string;
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -302,6 +303,17 @@ class DatabaseService {
   public setRequestsChannelId(channelId: string): void {
     this.data.requestsChannelId = channelId;
     CONFIG.REQUESTS_CHANNEL_ID = channelId;
+    this.save();
+  }
+
+  // --- Custom Prefix ---
+  public getPrefix(): string {
+    return this.data.customPrefix || CONFIG.PREFIX || '!';
+  }
+
+  public setPrefix(prefix: string): void {
+    this.data.customPrefix = prefix;
+    CONFIG.PREFIX = prefix;
     this.save();
   }
 }
