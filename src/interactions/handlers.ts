@@ -213,26 +213,60 @@ export async function handleButtonInteraction(interaction: ButtonInteraction): P
 
   if (customId.startsWith('help_cat_')) {
     const page = parseInt(customId.replace('help_cat_', ''), 10) || 0;
+    const member = interaction.member as GuildMember;
+    const isAdminMember = member?.permissions?.has(PermissionFlagsBits.Administrator) ?? false;
+    const adminChanId = db.getAdminChannelId();
+    const inAdminChannel = !adminChanId || interaction.channelId === adminChanId;
+    const canAccessAdminHelp = isAdminMember && inAdminChannel;
+
+    if (page === 3 && !canAccessAdminHelp) {
+      if (!isAdminMember) {
+        await interaction.reply({
+          content: '❌ **Access Denied**: Administrator documentation is restricted to server administrators.',
+          flags: MessageFlags.Ephemeral,
+        });
+      } else {
+        await interaction.reply({
+          content: `🔒 **Admin Channel Restricted**: Administrator documentation and commands can only be viewed in the designated admin chat: <#${adminChanId}>.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+      return;
+    }
+
     const prefix = db.getPrefix();
-    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix, canAccessAdminHelp);
     await interaction.update(payload as any);
     return;
   }
 
   if (customId.startsWith('help_prev_')) {
     const cur = parseInt(customId.replace('help_prev_', ''), 10) || 0;
+    const member = interaction.member as GuildMember;
+    const isAdminMember = member?.permissions?.has(PermissionFlagsBits.Administrator) ?? false;
+    const adminChanId = db.getAdminChannelId();
+    const inAdminChannel = !adminChanId || interaction.channelId === adminChanId;
+    const canAccessAdminHelp = isAdminMember && inAdminChannel;
+
     const page = Math.max(0, cur - 1);
     const prefix = db.getPrefix();
-    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix, canAccessAdminHelp);
     await interaction.update(payload as any);
     return;
   }
 
   if (customId.startsWith('help_next_')) {
     const cur = parseInt(customId.replace('help_next_', ''), 10) || 0;
-    const page = Math.min(3, cur + 1);
+    const member = interaction.member as GuildMember;
+    const isAdminMember = member?.permissions?.has(PermissionFlagsBits.Administrator) ?? false;
+    const adminChanId = db.getAdminChannelId();
+    const inAdminChannel = !adminChanId || interaction.channelId === adminChanId;
+    const canAccessAdminHelp = isAdminMember && inAdminChannel;
+
+    const maxPage = canAccessAdminHelp ? 3 : 2;
+    const page = Math.min(maxPage, cur + 1);
     const prefix = db.getPrefix();
-    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix, canAccessAdminHelp);
     await interaction.update(payload as any);
     return;
   }

@@ -36,13 +36,55 @@ export async function handlePrefixMessage(message: Message, client: Client): Pro
       case 'help':
       case 'commands':
       case 'h': {
+        const isAdminMember = message.member?.permissions.has(PermissionFlagsBits.Administrator) ?? false;
+        const adminChanId = db.getAdminChannelId();
+        const inAdminChannel = !adminChanId || message.channelId === adminChanId;
+        const canAccessAdminHelp = isAdminMember && inAdminChannel;
+
         let page = 0;
         const target = args[0]?.toLowerCase();
-        if (target === 'media' || target === '1') page = 1;
-        else if (target === 'community' || target === 'requests' || target === '2') page = 2;
-        else if (target === 'admin' || target === 'setup' || target === '3') page = 3;
+        if (target === 'media' || target === '1') {
+          page = 1;
+        } else if (target === 'community' || target === 'requests' || target === '2') {
+          page = 2;
+        } else if (target === 'admin' || target === 'setup' || target === '3') {
+          if (!isAdminMember) {
+            await message.reply('❌ **Access Denied**: Administrator documentation is restricted to server administrators.');
+            return;
+          }
+          if (!inAdminChannel) {
+            await message.reply(
+              `🔒 **Admin Channel Restricted**: Administrator documentation and commands can only be viewed in the designated admin chat: <#${adminChanId}>.`
+            );
+            return;
+          }
+          page = 3;
+        }
 
-        const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+        const payload = ZenoxEmbeds.createHelpMenu(page, prefix, canAccessAdminHelp);
+        await message.reply(payload);
+        return;
+      }
+
+      // Dedicated Admin Help Prefix Command
+      case 'adminhelp':
+      case 'helpadmin': {
+        const isAdminMember = message.member?.permissions.has(PermissionFlagsBits.Administrator) ?? false;
+        if (!isAdminMember) {
+          await message.reply('❌ **Access Denied**: Administrator documentation is restricted to server administrators.');
+          return;
+        }
+
+        const adminChanId = db.getAdminChannelId();
+        const inAdminChannel = !adminChanId || message.channelId === adminChanId;
+        if (!inAdminChannel) {
+          await message.reply(
+            `🔒 **Admin Channel Restricted**: Administrator documentation and commands can only be viewed in the designated admin chat: <#${adminChanId}>.`
+          );
+          return;
+        }
+
+        const payload = ZenoxEmbeds.createHelpMenu(3, prefix, true);
         await message.reply(payload);
         return;
       }
@@ -50,13 +92,20 @@ export async function handlePrefixMessage(message: Message, client: Client): Pro
       // 2. PREFIX
       case 'prefix': {
         if (!args.length) {
+          const isAdminMember = message.member?.permissions.has(PermissionFlagsBits.Administrator) ?? false;
+          const adminChanId = db.getAdminChannelId();
+          const inAdminChannel = !adminChanId || message.channelId === adminChanId;
+          const showAdminGuide = isAdminMember && inAdminChannel;
+
           const embed = new EmbedBuilder()
             .setTitle('⚡ Zenox Command Prefix')
             .setColor(ZENOX_COLORS.emerald)
             .setDescription(
               `The current server command prefix is: \`${prefix}\`\n\n` +
-              `• **Usage Example**: \`${prefix}help\`, \`${prefix}movie Inception\`, \`${prefix}status\`\n` +
-              `• **Change Prefix**: \`${prefix}prefix <symbol>\` or \`/adminsetup prefix\` *(Administrator only)*`
+              `• **Usage Example**: \`${prefix}help\`, \`${prefix}movie Inception\`, \`${prefix}status\`` +
+              (showAdminGuide
+                ? `\n• **Change Prefix**: \`${prefix}prefix <symbol>\` or \`/adminsetup prefix\` *(Administrator only)*`
+                : '')
             )
             .setFooter({ text: 'Zenox Command Dispatcher • zenox.lol', iconURL: ZENOX_BRANDING.avatarUrl });
           await message.reply({ embeds: [embed] });

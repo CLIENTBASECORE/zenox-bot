@@ -1141,7 +1141,7 @@ export const adminsetupCommand: Command = {
   },
 };
 
-// 16. /help [category] (Interactive Paginated Categorized Help Manual)
+// 16. /help [category] (Interactive Paginated Categorized Help Manual for Public Commands)
 export const helpCommand: Command = {
   data: new SlashCommandBuilder()
     .setName('help')
@@ -1154,25 +1154,64 @@ export const helpCommand: Command = {
         .addChoices(
           { name: '🏠 Overview & Guide', value: 'overview' },
           { name: '🎬 Media & Catalog', value: 'media' },
-          { name: '💬 Community & Requests', value: 'community' },
-          { name: '🛡️ Administrator & Setup', value: 'admin' }
+          { name: '💬 Community & Requests', value: 'community' }
         )
     ),
   async execute(interaction) {
     const category = interaction.options.getString('category');
+    const isAdminMember = interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) ?? false;
+    const adminChanId = db.getAdminChannelId();
+    const inAdminChannel = !adminChanId || interaction.channelId === adminChanId;
+    const canAccessAdminHelp = isAdminMember && inAdminChannel;
+
     let page = 0;
-    if (category === 'media') page = 1;
-    else if (category === 'community') page = 2;
-    else if (category === 'admin') page = 3;
+    if (category === 'media') {
+      page = 1;
+    } else if (category === 'community') {
+      page = 2;
+    } else if (category === 'admin') {
+      if (!isAdminMember) {
+        await interaction.reply({
+          content: '❌ **Access Denied**: Administrator documentation is restricted to server administrators.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (!inAdminChannel) {
+        await interaction.reply({
+          content: `🔒 **Admin Channel Restricted**: Administrator documentation and commands can only be viewed in the designated admin chat: <#${adminChanId}>.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      page = 3;
+    }
 
     const prefix = db.getPrefix();
-    const payload = ZenoxEmbeds.createHelpMenu(page, prefix);
+    const payload = ZenoxEmbeds.createHelpMenu(page, prefix, canAccessAdminHelp);
     await interaction.reply(payload);
+  },
+};
+
+// 17. /adminhelp (Dedicated Administrator & Setup Manual - ADMIN ONLY)
+export const adminhelpCommand: Command = {
+  data: new SlashCommandBuilder()
+    .setName('adminhelp')
+    .setDescription('Administrator and server setup command documentation and manual')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setDMPermission(false),
+  async execute(interaction) {
+    if (!(await ensureAdminContext(interaction, { allowConfigChannel: true }))) return;
+
+    const prefix = db.getPrefix();
+    const payload = ZenoxEmbeds.createHelpMenu(3, prefix, true);
+    await interaction.reply({ ...payload, flags: MessageFlags.Ephemeral });
   },
 };
 
 export const ALL_COMMANDS: Command[] = [
   helpCommand,
+  adminhelpCommand,
   searchCommand,
   trendingCommand,
   randomCommand,

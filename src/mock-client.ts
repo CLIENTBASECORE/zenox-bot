@@ -57,9 +57,35 @@ async function testSuite() {
   console.log(`   Total Requests in Queue: ${requests.length}`);
   const ticketEmbed = ZenoxEmbeds.requestTicket(requests[0]);
   console.log(`   Ticket #${requests[0].id} Status: ${requests[0].status}`);
-  console.log('   ✅ Request ticket valid.\n');
+  // 8. Test Help Menu Security (Public vs Admin)
+  console.log('8. Testing Help Menu Security (Public vs Admin)...');
+  const publicHelp = ZenoxEmbeds.createHelpMenu(0, '!', false);
+  const publicCatButtons = publicHelp.components[0].components.map(b => (b.data as any).custom_id);
+  if (publicCatButtons.includes('help_cat_3')) {
+    throw new Error('SECURITY VIOLATION: help_cat_3 (Admin) found on public help menu!');
+  }
+  const publicDesc = publicHelp.embeds[0].data.description || '';
+  if (publicDesc.includes('Administrator & Setup') || publicDesc.includes('adminsetup')) {
+    throw new Error('SECURITY VIOLATION: Admin setup leaked in public help overview description!');
+  }
+  const hackedPublicHelp = ZenoxEmbeds.createHelpMenu(3, '!', false);
+  if (hackedPublicHelp.embeds[0].data.title?.includes('Administrator')) {
+    throw new Error('SECURITY VIOLATION: Admin page served to unauthenticated public user!');
+  }
 
-  console.log('\x1b[32m=== ALL 7 SYSTEM TESTS PASSED SUCCESSFULLY ===\x1b[0m');
+  const adminHelp = ZenoxEmbeds.createHelpMenu(3, '!', true);
+  const adminCatButtons = adminHelp.components[0].components.map(b => (b.data as any).custom_id);
+  if (!adminCatButtons.includes('help_cat_3')) {
+    throw new Error('Admin help menu missing help_cat_3 button!');
+  }
+  if (!adminHelp.embeds[0].data.title?.includes('Administrator')) {
+    throw new Error('Admin help page 3 title missing Administrator header!');
+  }
+  console.log('   ✅ Public help menu strictly sanitized (0 admin leaks).');
+  console.log('   ✅ Admin help menu properly accessible only when isAdmin=true.\n');
+
+  console.log('\x1b[32m=== ALL 8 SYSTEM TESTS PASSED SUCCESSFULLY ===\x1b[0m');
 }
 
 testSuite();
+

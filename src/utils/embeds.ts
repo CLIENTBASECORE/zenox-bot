@@ -463,10 +463,13 @@ export class ZenoxEmbeds {
    */
   public static createHelpMenu(
     pageIndex: number = 0,
-    activePrefix: string = '!'
+    activePrefix: string = '!',
+    isAdmin: boolean = false
   ): { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] } {
     const p = activePrefix;
-    const page = Math.max(0, Math.min(3, pageIndex));
+    const maxPage = isAdmin ? 3 : 2;
+    const totalPages = isAdmin ? 4 : 3;
+    const page = Math.max(0, Math.min(maxPage, pageIndex));
 
     let title = '';
     let desc = '';
@@ -478,7 +481,7 @@ export class ZenoxEmbeds {
       desc =
         `Welcome to the **Zenox Cinema Discord Bot**!\n` +
         `You can interact with the bot using **Slash Commands** (\`/command\`) or **Custom Prefix Commands** (\`${p}command\`).\n\n` +
-        `**Current Server Prefix:** \`${p}\` *(Change anytime with \`${p}prefix <symbol>\` or \`/adminsetup prefix\`)*\n` +
+        `**Current Server Prefix:** \`${p}\`\n` +
         `**Official Platform:** [zenox.lol](https://zenox.lol) • High-Speed Ad-Free Streaming\n\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
         `### 📂 Select a Category Below:\n\n` +
@@ -486,8 +489,10 @@ export class ZenoxEmbeds {
         `  Search TMDB catalog, view trending, roll random titles, broadcast now playing, schedule watch parties.\n\n` +
         `• **💬 Community & Requests (Page 3)**\n` +
         `  Request missing movies/series, public ticket queue, chat with Zenox AI, node latency, domain mirrors.\n\n` +
-        `• **🛡️ Administrator & Setup (Page 4)**\n` +
-        `  Server setup suite, broadcast announcements, say messages, deploy self-assign role panels, prefix settings.\n\n` +
+        (isAdmin
+          ? `• **🛡️ Administrator & Setup (Page 4)**\n` +
+            `  Server setup suite, broadcast announcements, say messages, deploy self-assign role panels, prefix settings.\n\n`
+          : '') +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
         `💡 *Click the category buttons below to jump directly, or use \`◀️ Back\` and \`Next ▶️\` to browse!*`;
     } else if (page === 1) {
@@ -552,7 +557,7 @@ export class ZenoxEmbeds {
         `• **Aliases:** \`${p}info\`, \`${p}about\`\n` +
         `• **Description:** Displays bot uptime, memory usage, gateway ping, and cloud architecture.\n` +
         `• **Prefix Format:** \`${p}botinfo\``;
-    } else {
+    } else if (isAdmin && page === 3) {
       categoryName = 'Admin & Setup';
       title = '🛡️ Administrator & Setup Commands';
       desc =
@@ -595,13 +600,13 @@ export class ZenoxEmbeds {
       .setColor(page === 3 ? ZENOX_COLORS.violet : ZENOX_COLORS.emerald)
       .setDescription(desc)
       .setFooter({
-        text: `Zenox Help Manual • Page ${page + 1} of 4 • Category: ${categoryName}`,
+        text: `Zenox Help Manual • Page ${page + 1} of ${totalPages} • Category: ${categoryName}`,
         iconURL: ZENOX_BRANDING.avatarUrl,
       })
       .setTimestamp();
 
     // Row 1: Direct Category Buttons
-    const categoryRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    const categoryButtons: ButtonBuilder[] = [
       new ButtonBuilder()
         .setCustomId('help_cat_0')
         .setLabel('🏠 Overview')
@@ -614,11 +619,18 @@ export class ZenoxEmbeds {
         .setCustomId('help_cat_2')
         .setLabel('💬 Community')
         .setStyle(page === 2 ? ButtonStyle.Primary : ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('help_cat_3')
-        .setLabel('🛡️ Admin')
-        .setStyle(page === 3 ? ButtonStyle.Primary : ButtonStyle.Secondary)
-    );
+    ];
+
+    if (isAdmin) {
+      categoryButtons.push(
+        new ButtonBuilder()
+          .setCustomId('help_cat_3')
+          .setLabel('🛡️ Admin')
+          .setStyle(page === 3 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      );
+    }
+
+    const categoryRow = new ActionRowBuilder<ButtonBuilder>().addComponents(...categoryButtons);
 
     // Row 2: Navigation & Controls
     const navRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -629,14 +641,14 @@ export class ZenoxEmbeds {
         .setDisabled(page === 0),
       new ButtonBuilder()
         .setCustomId('help_indicator')
-        .setLabel(`Page ${page + 1} / 4`)
+        .setLabel(`Page ${page + 1} / ${totalPages}`)
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(true),
       new ButtonBuilder()
         .setCustomId(`help_next_${page}`)
         .setLabel('Next ▶️')
         .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === 3),
+        .setDisabled(page === maxPage),
       new ButtonBuilder()
         .setCustomId('help_close')
         .setLabel('❌ Close')
